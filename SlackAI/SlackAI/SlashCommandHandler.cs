@@ -28,7 +28,7 @@ class SlashCommandHandler : ISlashCommandHandler
     public async Task<SlashCommandResponse> Handle(SlashCommand command)
     {
         Console.WriteLine($"{command.UserName} used the {"/ai"} slash command in the {command.ChannelName} channel");
-        Task.Run(() => AskAI(command.Text, command.ChannelName));
+        Task.Run(() => AskAI(command.Text, command.ChannelName, command.ChannelId));
         return new SlashCommandResponse
         {
             Message = new Message
@@ -38,24 +38,33 @@ class SlashCommandHandler : ISlashCommandHandler
         };
     }
 
-    public void AskAI(string prompt, string channel)
+    public void AskAI(string prompt, string channel_name, string channel_id)
     {
         Console.WriteLine($"> {prompt}");
-        string result = "";
+        string result = $">{prompt}\n";
+        /*
+         * Must include AntiPrompt to prevent the AI from repeating the prompt
+         */
         var response = session.Chat(prompt,
             new InferenceParams() {Temperature = 0.6f, MaxTokens = 500, FrequencyPenalty = 1.0f, PenalizeNL = false, AntiPrompts = new List<string> { "User:" } });
+        var message_response = _slack.Chat.PostMessage(new Message()
+            {
+                Channel = channel_name,
+                Text = result
+        }
+        );
+        message_response.Wait();
         foreach (var item in response)
         {
             Console.Write(item);
             result += $"{item}";
-        }
-        result = result.Remove(result.Length - 5, 5);
-        _slack.Chat.PostMessage(new Message()
+            // TODO 7/6/23: figure out a way to ignore the antiprompt
+            _slack.Chat.Update(new MessageUpdate()
             {
-                Channel = channel, 
-                Text = $">{prompt}\n{result}"
-
-            }
-        );
+                ChannelId = channel_id,
+                Ts = message_response.Result.Ts,
+                Text = result
+            });
+        }
     }
 }
