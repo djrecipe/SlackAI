@@ -8,6 +8,7 @@ using SlackNet.Interaction;
 using SlackNet.Interaction.Experimental;
 using SlackNet.WebApi;
 using LLamaModel = LLama.OldVersion.LLamaModel;
+using MessageUpdateResponse = SlackNet.WebApi.MessageUpdateResponse;
 
 namespace SlackAI;
 
@@ -40,30 +41,44 @@ class SlashCommandHandler : ISlashCommandHandler
 
     public void AskAI(string prompt, string channel_name, string channel_id)
     {
-        Console.WriteLine($"> {prompt}");
-        string result = $">{prompt}\n";
-        /*
-         * Must include AntiPrompt to prevent the AI from repeating the prompt
-         */
-        var response = session.Chat(prompt,
-            new InferenceParams() {Temperature = 0.6f, MaxTokens = 500, FrequencyPenalty = 1.0f, PenalizeNL = false, AntiPrompts = new List<string> { "User:" } });
-        var message_response = _slack.Chat.PostMessage(new Message()
+        try
+        {
+            Console.WriteLine($"> {prompt}");
+            string result = $">{prompt}\n";
+            /*
+             * Must include AntiPrompt to prevent the AI from repeating the prompt
+             */
+            var response = session.Chat(prompt,
+                new InferenceParams() { Temperature = 0.6f, MaxTokens = 5000, FrequencyPenalty = 1.0f, PenalizeNL = false, AntiPrompts = new List<string> { "-" } });
+            var message_response = _slack.Chat.PostMessage(new Message()
+                {
+                    Channel = channel_name,
+                    Text = result
+                }
+            );
+            message_response.Wait();
+            Task<MessageUpdateResponse> current_task = null;
+            foreach (var item in response)
+            {
+                Console.Write(item);
+                result += $"{item}";
+                if (current_task == null || current_task.IsCompleted)
+                {
+                    current_task = _slack.Chat.Update(new MessageUpdate()
+                    {
+                        ChannelId = channel_id,
+                        Ts = message_response.Result.Ts,
+                        Text = result
+                    });
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            _slack.Chat.PostMessage(new Message()
             {
                 Channel = channel_name,
-                Text = result
-        }
-        );
-        message_response.Wait();
-        foreach (var item in response)
-        {
-            Console.Write(item);
-            result += $"{item}";
-            // TODO 7/6/23: figure out a way to ignore the antiprompt
-            _slack.Chat.Update(new MessageUpdate()
-            {
-                ChannelId = channel_id,
-                Ts = message_response.Result.Ts,
-                Text = result
+                Text = $"Error while using AI: '{e.Message}'"
             });
         }
     }
