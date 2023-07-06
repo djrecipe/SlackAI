@@ -49,7 +49,7 @@ class SlashCommandHandler : ISlashCommandHandler
              * Must include AntiPrompt to prevent the AI from repeating the prompt
              */
             var response = session.Chat(prompt,
-                new InferenceParams() { Temperature = 0.6f, MaxTokens = 5000, FrequencyPenalty = 1.0f, PenalizeNL = false, AntiPrompts = new List<string> { "-" } });
+                new InferenceParams() { Temperature = 0.6f, MaxTokens = 5000, FrequencyPenalty = 1.0f, PenalizeNL = false, AntiPrompts = new List<string> { "User: " } });
             var message_response = _slack.Chat.PostMessage(new Message()
                 {
                     Channel = channel_name,
