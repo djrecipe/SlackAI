@@ -1,19 +1,23 @@
 ﻿using SlackAI;
 using SlackNet;
 using SlackNet.WebApi;
-using SlackNet.Events;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using SlackNet.Blocks;
-using SlackNet.Events;
 using SlackNet.Extensions.DependencyInjection;
+
+var settings = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    .AddUserSecrets<Program>()
+    .Build()
+    .Get<AppSettings>();
+
+SlashCommandHandler.ModelPath = settings.ModelPath;
 
 var serviceCollection = new ServiceCollection();
 serviceCollection.AddSlackNet(c => c
     // Configure the tokens used to authenticate with Slack
-    .UseApiToken("") // This gets used by the API client
-    .UseAppLevelToken(
-        "") // This gets used by the socket mode client
+    .UseApiToken(settings.ApiKey) // This gets used by the API client
+    .UseAppLevelToken(settings.ApiKeySockets) // This gets used by the socket mode client
 
     .RegisterSlashCommandHandler<SlashCommandHandler>("/ai")
 );

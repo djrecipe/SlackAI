@@ -19,11 +19,12 @@ class SlashCommandHandler : ISlashCommandHandler
 {
     private ChatSession session;
     private readonly ISlackApiClient _slack;
+    public static string ModelPath { get; set; }
     public SlashCommandHandler(ISlackApiClient slack)
     {
         _slack = slack;
         var ex = new InteractiveExecutor(
-            new LLama.LLamaModel(new ModelParams("wizardLM-7B.ggmlv3.q4_0.bin")));
+            new LLama.LLamaModel(new ModelParams(ModelPath)));
         session = new ChatSession(ex);
     }
     public async Task<SlashCommandResponse> Handle(SlashCommand command)
