@@ -23,7 +23,7 @@ class SlashCommandHandler : ISlashCommandHandler
     {
         _slack = slack;
         var ex = new InteractiveExecutor(
-            new LLama.LLamaModel(new ModelParams("C:\\Downloads\\wizardLM-7B.ggmlv3.q4_0.bin")));
+            new LLama.LLamaModel(new ModelParams("wizardLM-7B.ggmlv3.q4_0.bin")));
         session = new ChatSession(ex);
     }
     public async Task<SlashCommandResponse> Handle(SlashCommand command)
