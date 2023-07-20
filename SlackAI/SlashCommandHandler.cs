@@ -76,11 +76,12 @@ class SlashCommandHandler : ISlashCommandHandler
         }
         catch (Exception e)
         {
-            _slack.Chat.PostMessage(new Message()
-            {
-                Channel = channel_name,
-                Text = $"Error while using AI: '{e.Message}'"
-            });
+            Console.WriteLine($"Error while using AI: '{e.Message}'");
+            //_slack.Chat.PostMessage(new Message()
+            //{
+            //    Channel = channel_name,
+            //    Text = $"Error while using AI: '{e.Message}'"
+            //});
         }
     }
 }
