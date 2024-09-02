@@ -11,7 +11,9 @@ var settings = new ConfigurationBuilder()
     .Build()
     .Get<AppSettings>();
 
-SlashCommandHandler.ModelPath = settings.ModelPath;
+ChatSlashCommandHandler.ModelPath = settings.ModelPath;
+GenSlashCommandHandler.OpenAIKey = settings.OpenAIKey;
+GenSlashCommandHandler.OpenAIEndpoint = settings.OpenAIEndpoint;
 
 var serviceCollection = new ServiceCollection();
 serviceCollection.AddSlackNet(c => c
@@ -19,7 +21,8 @@ serviceCollection.AddSlackNet(c => c
     .UseApiToken(settings.ApiKey) // This gets used by the API client
     .UseAppLevelToken(settings.ApiKeySockets) // This gets used by the socket mode client
 
-    .RegisterSlashCommandHandler<SlashCommandHandler>("/ai")
+    .RegisterSlashCommandHandler<ChatSlashCommandHandler>("/ai")
+    .RegisterSlashCommandHandler<GenSlashCommandHandler>("/gen")
 );
 var services = serviceCollection.BuildServiceProvider();
 

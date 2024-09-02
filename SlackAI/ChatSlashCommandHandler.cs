@@ -15,12 +15,12 @@ namespace SlackAI;
 /// <summary>
 /// A slash command handler that just echos back whatever you sent it 
 /// </summary>
-class SlashCommandHandler : ISlashCommandHandler
+class ChatSlashCommandHandler : ISlashCommandHandler
 {
     private ChatSession session;
     private readonly ISlackApiClient _slack;
     public static string ModelPath { get; set; }
-    public SlashCommandHandler(ISlackApiClient slack)
+    public ChatSlashCommandHandler(ISlackApiClient slack)
     {
         _slack = slack;
         var ex = new InteractiveExecutor(

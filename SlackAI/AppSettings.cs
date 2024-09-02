@@ -11,5 +11,7 @@ namespace SlackAI
         public string ApiKey { get; set; }
         public string ApiKeySockets { get; set; }
         public string ModelPath { get; set; }
+        public string OpenAIKey { get; set; }
+        public string OpenAIEndpoint { get; set; }
     }
 }
